@@ -1862,149 +1862,399 @@ public class FenetrePrincipale extends JFrame {
     
     // ==================== PANEL RÉSERVATION ====================
     
-    private class PanelReservation extends JPanel {
-        private Vol vol;
-        private JTextField txtNom, txtPrenom;
-        private JComboBox<String> comboClasse;
-        private JLabel lblInfoVol, lblPrixTotal;
-        private Passager passager;
-        private String siegeSelectionne;
+// ==================== PANEL RÉSERVATION CORRIGÉ ====================
+private class PanelReservation extends JPanel {
+    private Vol vol;
+    private JTextField txtNom, txtPrenom;
+    private JComboBox<String> comboClasse;
+    private JLabel lblInfoVol, lblPrixTotal;
+    private Passager passager;
+    private String siegeSelectionne;
+    private JPanel grilleSieges;
+    private ButtonGroup groupeSieges;
+    
+    public PanelReservation() {
+        setLayout(new BorderLayout());
+        setBackground(BACKGROUND);
         
-        public PanelReservation() {
-            setLayout(new BorderLayout());
-            setBackground(BACKGROUND);
-            
-            // En-tête
-            JPanel header = new JPanel(new BorderLayout());
-            header.setBackground(PRIMARY_DARK);
-            header.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
-            JLabel lblTitre = new JLabel("Réservation");
-            lblTitre.setFont(new Font("Segoe UI", Font.BOLD, 24));
-            lblTitre.setForeground(TEXT_PRIMARY);
-            header.add(lblTitre, BorderLayout.WEST);
-            add(header, BorderLayout.NORTH);
-            
-            // Contenu principal
-            JPanel contenu = new JPanel(new GridLayout(1, 2, 30, 0));
-            contenu.setBackground(BACKGROUND);
-            contenu.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
-            
-            // Formulaire passager
-            JPanel panelFormulaire = new JPanel();
-            panelFormulaire.setLayout(new BoxLayout(panelFormulaire, BoxLayout.Y_AXIS));
-            panelFormulaire.setBackground(Color.WHITE);
-            panelFormulaire.setBorder(BorderFactory.createCompoundBorder(
-                new ShadowBorder(10, new Color(0, 0, 0, 0.1f)),
-                BorderFactory.createEmptyBorder(30, 30, 30, 30)
-            ));
-            
-            lblInfoVol = new JLabel();
-            lblInfoVol.setFont(new Font("Segoe UI", Font.BOLD, 16));
-            lblInfoVol.setForeground(PRIMARY_DARK);
-            panelFormulaire.add(lblInfoVol);
-            panelFormulaire.add(Box.createVerticalStrut(20));
-            
-            txtNom = new JTextField(20);
-            txtPrenom = new JTextField(20);
-            comboClasse = new JComboBox<>(new String[]{"Economique", "Business", "Premiere"});
-            
-            panelFormulaire.add(creerChampFormulaire("Nom", txtNom));
-            panelFormulaire.add(Box.createVerticalStrut(15));
-            panelFormulaire.add(creerChampFormulaire("Prénom", txtPrenom));
-            panelFormulaire.add(Box.createVerticalStrut(15));
-            panelFormulaire.add(creerChampFormulaire("Classe", comboClasse));
-            panelFormulaire.add(Box.createVerticalStrut(20));
-            
-            lblPrixTotal = new JLabel("Total: 0.00 €");
-            lblPrixTotal.setFont(new Font("Segoe UI", Font.BOLD, 20));
-            lblPrixTotal.setForeground(SUCCESS);
-            panelFormulaire.add(lblPrixTotal);
-            panelFormulaire.add(Box.createVerticalStrut(30));
-            
-            JButton btnContinuer = creerBoutonPrincipal("Continuer vers le paiement →");
-            btnContinuer.addActionListener(e -> {
-                if (validerFormulaire()) {
-                    passager = new Passager(txtNom.getText(), txtPrenom.getText(), 
-                        LocalDate.of(1990, 1, 1), "P" + System.currentTimeMillis(), 
-                        (String) comboClasse.getSelectedItem());
-                    cardLayout.show(panelPrincipal, "PAIEMENT");
-                }
-            });
-            panelFormulaire.add(btnContinuer);
-            panelFormulaire.add(Box.createVerticalStrut(10));
-            
-            JButton btnRetour = new JButton("← Retour aux vols");
-            btnRetour.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            btnRetour.setForeground(TEXT_SECONDARY);
-            btnRetour.setContentAreaFilled(false);
-            btnRetour.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            btnRetour.addActionListener(e -> cardLayout.show(panelPrincipal, "RECHERCHE"));
-            btnRetour.setAlignmentX(Component.LEFT_ALIGNMENT);
-            panelFormulaire.add(btnRetour);
-            
-            // Panel de sélection des sièges (placeholder)
-            JPanel panelSiege = new JPanel();
-            panelSiege.setLayout(new BoxLayout(panelSiege, BoxLayout.Y_AXIS));
-            panelSiege.setBackground(Color.WHITE);
-            panelSiege.setBorder(BorderFactory.createCompoundBorder(
-                new ShadowBorder(10, new Color(0, 0, 0, 0.1f)),
-                BorderFactory.createEmptyBorder(30, 30, 30, 30)
-            ));
-            
-            JLabel lblSiegeTitre = new JLabel("Sélectionnez votre siège");
-            lblSiegeTitre.setFont(new Font("Segoe UI", Font.BOLD, 18));
-            lblSiegeTitre.setForeground(PRIMARY_DARK);
-            panelSiege.add(lblSiegeTitre);
-            panelSiege.add(Box.createVerticalStrut(20));
-            
-            contenu.add(panelFormulaire);
-            contenu.add(panelSiege);
-            
-            add(contenu, BorderLayout.CENTER);
-        }
+        // En-tête
+        JPanel header = createHeader();
+        add(header, BorderLayout.NORTH);
         
-        /**
-         * Définit le vol à réserver
-         */
-        public void setVol(Vol vol) {
-            this.vol = vol;
-            lblInfoVol.setText(String.format("<html><b>%s</b><br>%s → %s<br>%s</html>",
-                vol.getNumeroVol(), vol.getAeroportDepart(), 
-                vol.getAeroportArrivee(), vol.getDateDepart()));
-            lblPrixTotal.setText(String.format("Total: %.2f €", vol.getPrix()));
-        }
+        // Contenu principal avec les deux panels
+        JPanel contenu = new JPanel(new GridLayout(1, 2, 30, 0));
+        contenu.setBackground(BACKGROUND);
+        contenu.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
         
-        /**
-         * Crée un champ de formulaire
-         */
-        private JPanel creerChampFormulaire(String label, JComponent champ) {
-            JPanel panel = new JPanel(new BorderLayout(5, 5));
-            panel.setBackground(Color.WHITE);
-            panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
-            
-            JLabel lbl = new JLabel(label);
-            lbl.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            lbl.setForeground(TEXT_SECONDARY);
-            panel.add(lbl, BorderLayout.NORTH);
-            
-            if (champ instanceof JTextField) styleTextField((JTextField)champ);
-            panel.add(champ, BorderLayout.CENTER);
-            
-            return panel;
-        }
+        // Panel 1 : Formulaire passager
+        JPanel panelFormulaire = createFormulairePanel();
         
-        /**
-         * Valide le formulaire
-         */
-        private boolean validerFormulaire() {
-            if (txtNom.getText().trim().isEmpty() || txtPrenom.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Veuillez remplir tous les champs");
-                return false;
-            }
-            return true;
-        }
+        // Panel 2 : Sélection des sièges (AVEC VRAIS SIÈGES)
+        JPanel panelSiege = createSiegePanelComplet();
+        
+        contenu.add(panelFormulaire);
+        contenu.add(panelSiege);
+        
+        add(contenu, BorderLayout.CENTER);
     }
+    
+    /**
+     * Crée l'en-tête
+     */
+    private JPanel createHeader() {
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(PRIMARY_DARK);
+        header.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        JLabel lblTitre = new JLabel("Réservation");
+        lblTitre.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        lblTitre.setForeground(TEXT_PRIMARY);
+        header.add(lblTitre, BorderLayout.WEST);
+        return header;
+    }
+    
+    /**
+     * Crée le formulaire passager
+     */
+    private JPanel createFormulairePanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            new ShadowBorder(10, new Color(0, 0, 0, 0.1f)),
+            BorderFactory.createEmptyBorder(30, 30, 30, 30)
+        ));
+        
+        // Informations du vol
+        lblInfoVol = new JLabel("Sélectionnez un vol");
+        lblInfoVol.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblInfoVol.setForeground(PRIMARY_DARK);
+        lblInfoVol.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(lblInfoVol);
+        panel.add(Box.createVerticalStrut(20));
+        
+        // Champ Nom
+        JLabel lblNom = new JLabel("Nom complet");
+        lblNom.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblNom.setForeground(TEXT_SECONDARY);
+        lblNom.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(lblNom);
+        panel.add(Box.createVerticalStrut(5));
+        
+        txtNom = new JTextField();
+        txtNom.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtNom.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER_COLOR),
+            BorderFactory.createEmptyBorder(10, 12, 10, 12)
+        ));
+        txtNom.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+        txtNom.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(txtNom);
+        panel.add(Box.createVerticalStrut(15));
+        
+        // Champ Prénom
+        JLabel lblPrenom = new JLabel("Prénom");
+        lblPrenom.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblPrenom.setForeground(TEXT_SECONDARY);
+        lblPrenom.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(lblPrenom);
+        panel.add(Box.createVerticalStrut(5));
+        
+        txtPrenom = new JTextField();
+        txtPrenom.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtPrenom.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER_COLOR),
+            BorderFactory.createEmptyBorder(10, 12, 10, 12)
+        ));
+        txtPrenom.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+        txtPrenom.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(txtPrenom);
+        panel.add(Box.createVerticalStrut(15));
+        
+        // Champ Classe
+        JLabel lblClasse = new JLabel("Classe de voyage");
+        lblClasse.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblClasse.setForeground(TEXT_SECONDARY);
+        lblClasse.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(lblClasse);
+        panel.add(Box.createVerticalStrut(5));
+        
+        comboClasse = new JComboBox<>(new String[]{"Economique", "Business", "Première"});
+        comboClasse.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        comboClasse.setBackground(Color.WHITE);
+        comboClasse.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+        comboClasse.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+        comboClasse.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(comboClasse);
+        panel.add(Box.createVerticalStrut(20));
+        
+        // Prix total
+        lblPrixTotal = new JLabel("Total: 0,00 €");
+        lblPrixTotal.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        lblPrixTotal.setForeground(SUCCESS);
+        lblPrixTotal.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(lblPrixTotal);
+        panel.add(Box.createVerticalStrut(20));
+        
+        // Bouton Continuer
+        JButton btnContinuer = new JButton("Continuer vers le paiement →");
+        btnContinuer.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnContinuer.setForeground(Color.WHITE);
+        btnContinuer.setBackground(ACCENT);
+        btnContinuer.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
+        btnContinuer.setFocusPainted(false);
+        btnContinuer.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnContinuer.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnContinuer.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+        
+        btnContinuer.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btnContinuer.setBackground(ACCENT_HOVER);
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btnContinuer.setBackground(ACCENT);
+            }
+        });
+        
+        btnContinuer.addActionListener(e -> {
+            if (validerFormulaire()) {
+                continuerVersPaiement();
+            }
+        });
+        
+        panel.add(btnContinuer);
+        panel.add(Box.createVerticalStrut(10));
+        
+        // Bouton Retour
+        JButton btnRetour = new JButton("← Retour aux vols");
+        btnRetour.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        btnRetour.setForeground(ACCENT);
+        btnRetour.setContentAreaFilled(false);
+        btnRetour.setBorderPainted(false);
+        btnRetour.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnRetour.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnRetour.addActionListener(e -> cardLayout.show(panelPrincipal, "RECHERCHE"));
+        panel.add(btnRetour);
+        
+        return panel;
+    }
+    
+    /**
+     * Crée le panel de sélection des sièges avec de vrais sièges
+     */
+    private JPanel createSiegePanelComplet() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            new ShadowBorder(10, new Color(0, 0, 0, 0.1f)),
+            BorderFactory.createEmptyBorder(30, 30, 30, 30)
+        ));
+        
+        // Titre
+        JLabel lblSiegeTitre = new JLabel("Sélectionnez votre siège");
+        lblSiegeTitre.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        lblSiegeTitre.setForeground(PRIMARY_DARK);
+        lblSiegeTitre.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(lblSiegeTitre);
+        panel.add(Box.createVerticalStrut(5));
+        
+        JLabel lblSiegeSub = new JLabel("Cliquez sur un siège disponible");
+        lblSiegeSub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblSiegeSub.setForeground(TEXT_SECONDARY);
+        lblSiegeSub.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(lblSiegeSub);
+        panel.add(Box.createVerticalStrut(20));
+        
+        // Plan de l'avion
+        JPanel planAvion = new JPanel();
+        planAvion.setLayout(new BoxLayout(planAvion, BoxLayout.Y_AXIS));
+        planAvion.setBackground(new Color(248, 250, 252));
+        planAvion.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+        planAvion.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Cockpit
+        JPanel cockpit = new JPanel(new FlowLayout());
+        cockpit.setBackground(new Color(226, 232, 240));
+        cockpit.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        JLabel lblCockpit = new JLabel("✈️ Cockpit");
+        lblCockpit.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        cockpit.add(lblCockpit);
+        planAvion.add(cockpit);
+        
+        // Grille de sièges
+        JPanel grille = new JPanel(new GridLayout(0, 4, 10, 10));
+        grille.setBackground(new Color(248, 250, 252));
+        grille.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        
+        // Créer les boutons de sièges
+        String[] classes = {"E", "B", "P"};
+        for (int c = 0; c < classes.length; c++) {
+            for (int i = 1; i <= 4; i++) {
+                String numeroSiege = classes[c] + i;
+                JButton btnSiege = new JButton(numeroSiege);
+                btnSiege.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                btnSiege.setPreferredSize(new Dimension(45, 45));
+                
+                // Simuler des sièges disponibles (80%) et occupés (20%)
+                if (Math.random() > 0.2) {
+                    btnSiege.setBackground(new Color(219, 234, 254)); // Bleu clair
+                    btnSiege.setForeground(PRIMARY_DARK);
+                    btnSiege.setEnabled(true);
+                } else {
+                    btnSiege.setBackground(new Color(229, 231, 235)); // Gris
+                    btnSiege.setForeground(TEXT_SECONDARY);
+                    btnSiege.setEnabled(false);
+                }
+                
+                btnSiege.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+                btnSiege.setFocusPainted(false);
+                btnSiege.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                
+                btnSiege.addActionListener(e -> {
+                    // Désélectionner tous les autres boutons
+                    for (Component comp : grille.getComponents()) {
+                        if (comp instanceof JButton) {
+                            comp.setBackground(new Color(219, 234, 254));
+                        }
+                    }
+                    // Sélectionner celui-ci
+                    btnSiege.setBackground(ACCENT);
+                    siegeSelectionne = btnSiege.getText();
+                });
+                
+                grille.add(btnSiege);
+            }
+        }
+        
+        planAvion.add(grille);
+        
+        // Allée
+        JPanel allee = new JPanel(new FlowLayout());
+        allee.setBackground(new Color(226, 232, 240));
+        allee.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
+        JLabel lblAllee = new JLabel("⬇ Allée centrale ⬇");
+        lblAllee.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        allee.add(lblAllee);
+        planAvion.add(allee);
+        
+        panel.add(planAvion);
+        panel.add(Box.createVerticalStrut(20));
+        
+        // Légende
+        JPanel legendPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
+        legendPanel.setBackground(Color.WHITE);
+        legendPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Disponible
+        JPanel dispPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        dispPanel.setBackground(Color.WHITE);
+        JPanel dispColor = new JPanel();
+        dispColor.setBackground(new Color(219, 234, 254));
+        dispColor.setPreferredSize(new Dimension(15, 15));
+        dispColor.setBorder(BorderFactory.createLineBorder(new Color(147, 197, 253)));
+        dispPanel.add(dispColor);
+        dispPanel.add(new JLabel("Disponible"));
+        
+        // Occupé
+        JPanel occPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        occPanel.setBackground(Color.WHITE);
+        JPanel occColor = new JPanel();
+        occColor.setBackground(new Color(229, 231, 235));
+        occColor.setPreferredSize(new Dimension(15, 15));
+        occColor.setBorder(BorderFactory.createLineBorder(new Color(156, 163, 175)));
+        occPanel.add(occColor);
+        occPanel.add(new JLabel("Occupé"));
+        
+        // Sélectionné
+        JPanel selPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        selPanel.setBackground(Color.WHITE);
+        JPanel selColor = new JPanel();
+        selColor.setBackground(ACCENT);
+        selColor.setPreferredSize(new Dimension(15, 15));
+        selColor.setBorder(BorderFactory.createLineBorder(ACCENT_HOVER));
+        selPanel.add(selColor);
+        selPanel.add(new JLabel("Sélectionné"));
+        
+        legendPanel.add(dispPanel);
+        legendPanel.add(occPanel);
+        legendPanel.add(selPanel);
+        
+        panel.add(legendPanel);
+        
+        return panel;
+    }
+    
+    /**
+     * Définit le vol à réserver
+     */
+    public void setVol(Vol vol) {
+        this.vol = vol;
+        lblInfoVol.setText(String.format("<html><b>%s</b><br>%s → %s<br>%s</html>",
+            vol.getNumeroVol(), 
+            vol.getAeroportDepart(), 
+            vol.getAeroportArrivee(),
+            vol.getDateDepart().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))));
+        lblPrixTotal.setText(String.format("Total: %.2f €", vol.getPrix()));
+    }
+    
+    /**
+     * Crée un champ de formulaire
+     */
+    private JPanel creerChampFormulaire(String label, JComponent champ) {
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
+        panel.setBackground(Color.WHITE);
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+        
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lbl.setForeground(TEXT_SECONDARY);
+        panel.add(lbl, BorderLayout.NORTH);
+        
+        if (champ instanceof JTextField) styleTextField((JTextField)champ);
+        panel.add(champ, BorderLayout.CENTER);
+        
+        return panel;
+    }
+    
+    /**
+     * Valide le formulaire
+     */
+    private boolean validerFormulaire() {
+        if (txtNom.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Veuillez saisir votre nom");
+            txtNom.requestFocus();
+            return false;
+        }
+        if (txtPrenom.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Veuillez saisir votre prénom");
+            txtPrenom.requestFocus();
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Continue vers le paiement
+     */
+    private void continuerVersPaiement() {
+        passager = new Passager(
+            txtNom.getText().trim(),
+            txtPrenom.getText().trim(),
+            LocalDate.of(1990, 1, 1),
+            "P" + System.currentTimeMillis(),
+            (String) comboClasse.getSelectedItem()
+        );
+        
+        Reservation reservation = serviceReservations.creerReservation(clientConnecte, vol);
+        reservation.ajouterPassager(passager);
+        
+        panelPaiement.setReservation(reservation);
+        cardLayout.show(panelPrincipal, "PAIEMENT");
+    }
+}
     
     // ==================== PANEL PAIEMENT ====================
     
@@ -2358,17 +2608,1294 @@ public class FenetrePrincipale extends JFrame {
         cardLayout.show(panelPrincipal, "CONNEXION");
     }
     
-    // ==================== PANELS PLACEHOLDER ====================
+    // ==================== PANEL MES RÉSERVATIONS ====================
+private class PanelProfil extends JPanel {
+    private JTable tableReservations;
+    private DefaultTableModel modelReservations;
+    private JLabel lblMessage;
     
-    private class PanelProfil extends JPanel {
-        public PanelProfil() { setBackground(BACKGROUND); }
+    public PanelProfil() {
+        setLayout(new BorderLayout());
+        setBackground(BACKGROUND);
+        
+        // En-tête
+        JPanel header = createHeader();
+        add(header, BorderLayout.NORTH);
+        
+        // Contenu principal
+        JPanel contentPanel = createContentPanel();
+        add(contentPanel, BorderLayout.CENTER);
+        
+        // Charger les réservations
+        chargerReservations();
     }
+    
+    /**
+     * Crée l'en-tête du panel
+     */
+    private JPanel createHeader() {
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(PRIMARY_DARK);
+        header.setBorder(BorderFactory.createEmptyBorder(25, 35, 25, 35));
+        
+        JLabel lblTitre = new JLabel("Mes réservations");
+        lblTitre.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        lblTitre.setForeground(TEXT_PRIMARY);
+        
+        JLabel lblSousTitre = new JLabel("Consultez et gérez vos voyages");
+        lblSousTitre.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblSousTitre.setForeground(TEXT_SECONDARY);
+        
+        JPanel leftPanel = new JPanel();
+        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+        leftPanel.setOpaque(false);
+        leftPanel.add(lblTitre);
+        leftPanel.add(Box.createVerticalStrut(5));
+        leftPanel.add(lblSousTitre);
+        
+        header.add(leftPanel, BorderLayout.WEST);
+        
+        return header;
+    }
+    
+    /**
+     * Crée le contenu principal
+     */
+    private JPanel createContentPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(BACKGROUND);
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        
+        // Carte blanche pour le contenu
+        JPanel card = new JPanel(new BorderLayout());
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+            new ShadowBorder(10, new Color(0, 0, 0, 0.1f)),
+            BorderFactory.createEmptyBorder(30, 30, 30, 30)
+        ));
+        
+        // Message si aucune réservation
+        lblMessage = new JLabel("Vous n'avez aucune réservation pour le moment.");
+        lblMessage.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        lblMessage.setForeground(TEXT_SECONDARY);
+        lblMessage.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        // Tableau des réservations
+        String[] colonnes = {"N° Réservation", "Vol", "Date", "Passagers", "Montant", "Statut", "Action"};
+        modelReservations = new DefaultTableModel(colonnes, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 6; // Seule la colonne Action est éditable
+            }
+        };
+        
+        tableReservations = new JTable(modelReservations);
+        tableReservations.setRowHeight(60);
+        tableReservations.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        tableReservations.setSelectionBackground(new Color(224, 242, 254));
+        tableReservations.setShowGrid(false);
+        tableReservations.setIntercellSpacing(new Dimension(0, 0));
+        
+        // Style de l'en-tête
+        JTableHeader headerTable = tableReservations.getTableHeader();
+        headerTable.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        headerTable.setBackground(PRIMARY);
+        headerTable.setForeground(Color.WHITE);
+        headerTable.setPreferredSize(new Dimension(0, 45));
+        headerTable.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, ACCENT));
+        
+        // Renderer pour le statut
+        tableReservations.getColumnModel().getColumn(5).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                
+                String statut = value != null ? value.toString() : "";
+                setText(statut);
+                setHorizontalAlignment(CENTER);
+                
+                if ("Confirmée".equals(statut)) {
+                    setForeground(SUCCESS);
+                    setFont(new Font("Segoe UI", Font.BOLD, 12));
+                } else if ("En attente".equals(statut)) {
+                    setForeground(WARNING);
+                } else if ("Annulée".equals(statut)) {
+                    setForeground(DANGER);
+                }
+                
+                setBorder(BorderFactory.createEmptyBorder(12, 15, 12, 15));
+                
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252));
+                }
+                
+                return c;
+            }
+        });
+        
+        // Bouton d'action dans la dernière colonne
+        TableColumn actionColumn = tableReservations.getColumnModel().getColumn(6);
+        actionColumn.setCellRenderer(new ButtonRenderer());
+        actionColumn.setCellEditor(new ProfilButtonEditor(new JCheckBox()));
+        actionColumn.setPreferredWidth(100);
+        
+        JScrollPane scrollPane = new JScrollPane(tableReservations);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.WHITE);
+        
+        card.add(scrollPane, BorderLayout.CENTER);
+        panel.add(card, BorderLayout.CENTER);
+        
+        return panel;
+    }
+    
+    /**
+     * Charge les réservations de l'utilisateur
+     */
+    private void chargerReservations() {
+        modelReservations.setRowCount(0);
+        
+        if (clientConnecte == null) {
+            return;
+        }
+        
+        // Récupérer les réservations du client
+        List<Reservation> reservations = serviceReservations.getReservationsClient(clientConnecte);
+        
+        if (reservations.isEmpty()) {
+            // Afficher un message si pas de réservations
+            JPanel messagePanel = new JPanel(new GridBagLayout());
+            messagePanel.setBackground(Color.WHITE);
+            
+            JLabel lblIcon = new JLabel("📅");
+            lblIcon.setFont(new Font("Segoe UI", Font.PLAIN, 64));
+            lblIcon.setForeground(TEXT_SECONDARY);
+            
+            JLabel lblMessage = new JLabel("Vous n'avez aucune réservation pour le moment.");
+            lblMessage.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+            lblMessage.setForeground(TEXT_SECONDARY);
+            
+            JButton btnRechercher = new JButton("Rechercher un vol");
+            btnRechercher.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            btnRechercher.setForeground(Color.WHITE);
+            btnRechercher.setBackground(ACCENT);
+            btnRechercher.setBorder(BorderFactory.createEmptyBorder(12, 30, 12, 30));
+            btnRechercher.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            btnRechercher.addActionListener(e -> cardLayout.show(panelPrincipal, "RECHERCHE"));
+            
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            gbc.insets = new Insets(0, 0, 20, 0);
+            messagePanel.add(lblIcon, gbc);
+            
+            gbc.gridy = 1;
+            gbc.insets = new Insets(0, 0, 20, 0);
+            messagePanel.add(lblMessage, gbc);
+            
+            gbc.gridy = 2;
+            messagePanel.add(btnRechercher, gbc);
+            
+            JPanel card = (JPanel) ((JPanel) getComponent(1)).getComponent(0);
+            card.removeAll();
+            card.add(messagePanel, BorderLayout.CENTER);
+            card.revalidate();
+            card.repaint();
+        } else {
+            // Afficher les réservations dans le tableau
+            for (Reservation r : reservations) {
+                modelReservations.addRow(new Object[]{
+                    "RES" + String.format("%04d", r.getIdReservation()),
+                    r.getVol().getNumeroVol(),
+                    r.getVol().getDateDepart().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                    r.getPassagers().size() + " passager(s)",
+                    String.format("%.2f €", r.calculerMontantTotal()),
+                    r.getStatut(),
+                    "Détails"
+                });
+            }
+        }
+    }
+    
+    /**
+     * Éditeur pour le bouton Détails
+     */
+    private class ProfilButtonEditor extends DefaultCellEditor {
+        private JButton button;
+        private String label;
+        private boolean isPushed;
+        
+        public ProfilButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(e -> fireEditingStopped());
+        }
+        
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+            label = (value == null) ? "Détails" : value.toString();
+            button.setText(label);
+            button.setBackground(ACCENT);
+            button.setForeground(Color.WHITE);
+            isPushed = true;
+            return button;
+        }
+        
+        @Override
+        public Object getCellEditorValue() {
+            if (isPushed) {
+                JOptionPane.showMessageDialog(panelPrincipal,
+                    "Fonctionnalité à venir : Détails de la réservation",
+                    "Information",
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
+            isPushed = false;
+            return label;
+        }
+    }
+}
     private class PanelSieges extends JPanel {
         public PanelSieges() { setBackground(BACKGROUND); }
     }
-    private class PanelAvis extends JPanel {
-        public PanelAvis() { setBackground(BACKGROUND); }
+    // ==================== PANEL MON PROFIL ====================
+private class PanelMesReservations extends JPanel {
+    private JTextField txtNom, txtPrenom, txtEmail, txtTelephone;
+    private JPasswordField txtCurrentPassword, txtNewPassword, txtConfirmPassword;
+    private JLabel lblMembreDepuis;
+    private JTable tableReservations;
+    private DefaultTableModel modelReservations;
+    
+    public PanelMesReservations() {
+        setLayout(new BorderLayout());
+        setBackground(BACKGROUND);
+        
+        // En-tête
+        JPanel header = createHeader();
+        add(header, BorderLayout.NORTH);
+        
+        // Contenu principal
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        tabbedPane.setBackground(Color.WHITE);
+        tabbedPane.setBorder(BorderFactory.createEmptyBorder(20, 30, 30, 30));
+        
+        // Onglet Informations personnelles
+        JPanel infoPanel = createInfoPanel();
+        tabbedPane.addTab("👤 Informations personnelles", infoPanel);
+        
+        // Onglet Sécurité
+        JPanel securityPanel = createSecurityPanel();
+        tabbedPane.addTab("🔒 Sécurité", securityPanel);
+        
+        // Onglet Historique des réservations
+        JPanel historiquePanel = createHistoriquePanel();
+        tabbedPane.addTab("📅 Historique des réservations", historiquePanel);
+        
+        // Onglet Préférences
+        JPanel preferencesPanel = createPreferencesPanel();
+        tabbedPane.addTab("⚙️ Préférences", preferencesPanel);
+        
+        add(tabbedPane, BorderLayout.CENTER);
+        
+        // Charger les données du profil
+        chargerProfil();
     }
+    
+    /**
+     * Crée l'en-tête
+     */
+    private JPanel createHeader() {
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(PRIMARY_DARK);
+        header.setBorder(BorderFactory.createEmptyBorder(25, 35, 25, 35));
+        
+        JLabel lblTitre = new JLabel("Mon profil");
+        lblTitre.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        lblTitre.setForeground(TEXT_PRIMARY);
+        
+        JLabel lblSousTitre = new JLabel("Gérez vos informations personnelles et vos préférences");
+        lblSousTitre.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblSousTitre.setForeground(TEXT_SECONDARY);
+        
+        JPanel leftPanel = new JPanel();
+        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+        leftPanel.setOpaque(false);
+        leftPanel.add(lblTitre);
+        leftPanel.add(Box.createVerticalStrut(5));
+        leftPanel.add(lblSousTitre);
+        
+        header.add(leftPanel, BorderLayout.WEST);
+        
+        // Badge membre
+        JPanel badgePanel = new JPanel();
+        badgePanel.setBackground(new Color(255, 255, 255, 30));
+        badgePanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(255, 255, 255, 50), 1),
+            BorderFactory.createEmptyBorder(10, 20, 10, 20)
+        ));
+        
+        lblMembreDepuis = new JLabel("Membre depuis " + LocalDate.now().minusYears(1).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        lblMembreDepuis.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblMembreDepuis.setForeground(TEXT_PRIMARY);
+        badgePanel.add(lblMembreDepuis);
+        
+        header.add(badgePanel, BorderLayout.EAST);
+        
+        return header;
+    }
+    
+    /**
+     * Crée le panel d'informations personnelles
+     */
+    private JPanel createInfoPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(10, 10, 10, 10);
+        
+        // Avatar
+        JLabel lblAvatar = new JLabel("👤");
+        lblAvatar.setFont(new Font("Segoe UI", Font.PLAIN, 64));
+        lblAvatar.setForeground(ACCENT);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(0, 0, 20, 0);
+        panel.add(lblAvatar, gbc);
+        
+        // Nom
+        gbc.gridwidth = 1;
+        gbc.insets = new Insets(5, 10, 5, 10);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panel.add(createLabel("Nom complet"), gbc);
+        
+        gbc.gridx = 1;
+        txtNom = new JTextField(20);
+        styleTextField(txtNom);
+        panel.add(txtNom, gbc);
+        
+        // Prénom
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        panel.add(createLabel("Prénom"), gbc);
+        
+        gbc.gridx = 1;
+        txtPrenom = new JTextField(20);
+        styleTextField(txtPrenom);
+        panel.add(txtPrenom, gbc);
+        
+        // Email
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        panel.add(createLabel("Adresse email"), gbc);
+        
+        gbc.gridx = 1;
+        txtEmail = new JTextField(20);
+        styleTextField(txtEmail);
+        panel.add(txtEmail, gbc);
+        
+        // Téléphone
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        panel.add(createLabel("Téléphone"), gbc);
+        
+        gbc.gridx = 1;
+        txtTelephone = new JTextField(20);
+        styleTextField(txtTelephone);
+        panel.add(txtTelephone, gbc);
+        
+        // Boutons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
+        buttonPanel.setBackground(Color.WHITE);
+        
+        JButton btnAnnuler = new JButton("Annuler");
+        btnAnnuler.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        btnAnnuler.setForeground(TEXT_SECONDARY);
+        btnAnnuler.setBackground(new Color(248, 250, 252));
+        btnAnnuler.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+        btnAnnuler.setFocusPainted(false);
+        btnAnnuler.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        JButton btnSauvegarder = new JButton("Sauvegarder les modifications");
+        btnSauvegarder.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnSauvegarder.setForeground(Color.WHITE);
+        btnSauvegarder.setBackground(ACCENT);
+        btnSauvegarder.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
+        btnSauvegarder.setFocusPainted(false);
+        btnSauvegarder.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        btnSauvegarder.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btnSauvegarder.setBackground(ACCENT_HOVER);
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btnSauvegarder.setBackground(ACCENT);
+            }
+        });
+        
+        btnSauvegarder.addActionListener(e -> sauvegarderProfil());
+        
+        buttonPanel.add(btnAnnuler);
+        buttonPanel.add(btnSauvegarder);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(30, 10, 10, 10);
+        panel.add(buttonPanel, gbc);
+        
+        return panel;
+    }
+    
+    /**
+     * Crée le panel de sécurité
+     */
+    private JPanel createSecurityPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(10, 10, 10, 10);
+        
+        // Mot de passe actuel
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(createLabel("Mot de passe actuel"), gbc);
+        
+        gbc.gridx = 1;
+        txtCurrentPassword = new JPasswordField(20);
+        styleTextField(txtCurrentPassword);
+        panel.add(txtCurrentPassword, gbc);
+        
+        // Nouveau mot de passe
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panel.add(createLabel("Nouveau mot de passe"), gbc);
+        
+        gbc.gridx = 1;
+        txtNewPassword = new JPasswordField(20);
+        styleTextField(txtNewPassword);
+        panel.add(txtNewPassword, gbc);
+        
+        // Confirmation
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        panel.add(createLabel("Confirmer le mot de passe"), gbc);
+        
+        gbc.gridx = 1;
+        txtConfirmPassword = new JPasswordField(20);
+        styleTextField(txtConfirmPassword);
+        panel.add(txtConfirmPassword, gbc);
+        
+        // Force du mot de passe
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(5, 10, 5, 10);
+        
+        JProgressBar passwordStrength = new JProgressBar(0, 100);
+        passwordStrength.setValue(0);
+        passwordStrength.setStringPainted(true);
+        passwordStrength.setString("Force du mot de passe");
+        passwordStrength.setForeground(new Color(156, 163, 175));
+        panel.add(passwordStrength, gbc);
+        
+        // Recommandations
+        JPanel recommandationsPanel = new JPanel();
+        recommandationsPanel.setLayout(new BoxLayout(recommandationsPanel, BoxLayout.Y_AXIS));
+        recommandationsPanel.setBackground(new Color(248, 250, 252));
+        recommandationsPanel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+        
+        JLabel lblRecommandations = new JLabel("Recommandations :");
+        lblRecommandations.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblRecommandations.setForeground(PRIMARY_DARK);
+        lblRecommandations.setAlignmentX(Component.LEFT_ALIGNMENT);
+        recommandationsPanel.add(lblRecommandations);
+        recommandationsPanel.add(Box.createVerticalStrut(5));
+        
+        String[] recos = {
+            "• Au moins 8 caractères",
+            "• Au moins une lettre majuscule",
+            "• Au moins un chiffre",
+            "• Au moins un caractère spécial"
+        };
+        
+        for (String reco : recos) {
+            JLabel lblReco = new JLabel(reco);
+            lblReco.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            lblReco.setForeground(TEXT_SECONDARY);
+            recommandationsPanel.add(lblReco);
+        }
+        
+        gbc.gridy = 4;
+        panel.add(recommandationsPanel, gbc);
+        
+        // Bouton de changement
+        JButton btnChanger = new JButton("Changer le mot de passe");
+        btnChanger.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnChanger.setForeground(Color.WHITE);
+        btnChanger.setBackground(ACCENT);
+        btnChanger.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
+        btnChanger.setFocusPainted(false);
+        btnChanger.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        btnChanger.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btnChanger.setBackground(ACCENT_HOVER);
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btnChanger.setBackground(ACCENT);
+            }
+        });
+        
+        btnChanger.addActionListener(e -> changerMotDePasse(passwordStrength));
+        
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.add(btnChanger);
+        
+        gbc.gridy = 5;
+        gbc.insets = new Insets(30, 10, 10, 10);
+        panel.add(buttonPanel, gbc);
+        
+        return panel;
+    }
+    
+    /**
+     * Crée le panel d'historique
+     */
+    private JPanel createHistoriquePanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        
+        String[] colonnes = {"Réservation", "Vol", "Date", "Passagers", "Montant", "Statut"};
+        modelReservations = new DefaultTableModel(colonnes, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        
+        tableReservations = new JTable(modelReservations);
+        tableReservations.setRowHeight(50);
+        tableReservations.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tableReservations.setShowGrid(false);
+        tableReservations.setIntercellSpacing(new Dimension(0, 0));
+        
+        // Style de l'en-tête
+        JTableHeader header = tableReservations.getTableHeader();
+        header.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        header.setBackground(PRIMARY);
+        header.setForeground(Color.WHITE);
+        header.setPreferredSize(new Dimension(0, 40));
+        
+        // Renderer pour le statut
+        tableReservations.getColumnModel().getColumn(5).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                
+                String statut = value != null ? value.toString() : "";
+                
+                if ("Confirmée".equals(statut)) {
+                    setForeground(SUCCESS);
+                } else if ("En attente".equals(statut)) {
+                    setForeground(WARNING);
+                } else if ("Annulée".equals(statut)) {
+                    setForeground(DANGER);
+                }
+                
+                setHorizontalAlignment(CENTER);
+                setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+                
+                return c;
+            }
+        });
+        
+        JScrollPane scrollPane = new JScrollPane(tableReservations);
+        scrollPane.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+        
+        panel.add(scrollPane, BorderLayout.CENTER);
+        
+        return panel;
+    }
+    
+    /**
+     * Crée le panel des préférences
+     */
+    private JPanel createPreferencesPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(15, 15, 15, 15);
+        gbc.gridwidth = 2;
+        
+        // Notifications par email
+        JCheckBox chkEmailNotifications = new JCheckBox("Recevoir les notifications par email");
+        chkEmailNotifications.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        chkEmailNotifications.setBackground(Color.WHITE);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(chkEmailNotifications, gbc);
+        
+        // Rappels de vol
+        JCheckBox chkRappels = new JCheckBox("Recevoir des rappels avant les vols");
+        chkRappels.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        chkRappels.setBackground(Color.WHITE);
+        gbc.gridy = 1;
+        panel.add(chkRappels, gbc);
+        
+        // Offres promotionnelles
+        JCheckBox chkOffres = new JCheckBox("Recevoir des offres promotionnelles");
+        chkOffres.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        chkOffres.setBackground(Color.WHITE);
+        gbc.gridy = 2;
+        panel.add(chkOffres, gbc);
+        
+        // Langue préférée
+        gbc.gridy = 3;
+        gbc.gridwidth = 1;
+        panel.add(createLabel("Langue préférée"), gbc);
+        
+        gbc.gridx = 1;
+        JComboBox<String> comboLangue = new JComboBox<>(new String[]{"Français", "English", "العربية", "Español"});
+        comboLangue.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        comboLangue.setBackground(Color.WHITE);
+        comboLangue.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+        panel.add(comboLangue, gbc);
+        
+        // Devise préférée
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        panel.add(createLabel("Devise préférée"), gbc);
+        
+        gbc.gridx = 1;
+        JComboBox<String> comboDevise = new JComboBox<>(new String[]{"Euro (€)", "Dollar ($)", "Livre (£)", "Dirham (MAD)"});
+        comboDevise.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        comboDevise.setBackground(Color.WHITE);
+        comboDevise.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+        panel.add(comboDevise, gbc);
+        
+        // Bouton sauvegarder
+        JButton btnSauvegarder = new JButton("Sauvegarder les préférences");
+        btnSauvegarder.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnSauvegarder.setForeground(Color.WHITE);
+        btnSauvegarder.setBackground(ACCENT);
+        btnSauvegarder.setBorder(BorderFactory.createEmptyBorder(12, 30, 12, 30));
+        btnSauvegarder.setFocusPainted(false);
+        btnSauvegarder.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.add(btnSauvegarder);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(30, 15, 15, 15);
+        panel.add(buttonPanel, gbc);
+        
+        return panel;
+    }
+    
+    /**
+     * Crée un label stylisé
+     */
+    private JLabel createLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        label.setForeground(TEXT_SECONDARY);
+        return label;
+    }
+    
+    /**
+     * Charge les données du profil
+     */
+    private void chargerProfil() {
+        if (clientConnecte != null) {
+            txtNom.setText(clientConnecte.getNom());
+            txtPrenom.setText(clientConnecte.getPrenom());
+            txtEmail.setText(clientConnecte.getEmail());
+            txtTelephone.setText(clientConnecte.getTelephone());
+            
+            // Charger l'historique des réservations
+            chargerHistorique();
+        }
+    }
+    
+    /**
+     * Charge l'historique des réservations
+     */
+    private void chargerHistorique() {
+        modelReservations.setRowCount(0);
+        
+        List<Reservation> reservations = serviceReservations.getReservationsClient(clientConnecte);
+        
+        for (Reservation r : reservations) {
+            modelReservations.addRow(new Object[]{
+                "RES" + String.format("%04d", r.getIdReservation()),
+                r.getVol().getNumeroVol(),
+                r.getVol().getDateDepart().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                r.getPassagers().size() + " passager(s)",
+                String.format("%.2f €", r.calculerMontantTotal()),
+                r.getStatut()
+            });
+        }
+    }
+    
+    /**
+     * Sauvegarde les modifications du profil
+     */
+    private void sauvegarderProfil() {
+        JOptionPane.showMessageDialog(this, 
+            "Profil mis à jour avec succès !", 
+            "Succès", 
+            JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    /**
+     * Change le mot de passe
+     */
+    private void changerMotDePasse(JProgressBar strengthBar) {
+        String current = new String(txtCurrentPassword.getPassword());
+        String nouveau = new String(txtNewPassword.getPassword());
+        String confirm = new String(txtConfirmPassword.getPassword());
+        
+        if (current.isEmpty() || nouveau.isEmpty() || confirm.isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Veuillez remplir tous les champs", 
+                "Erreur", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        if (!nouveau.equals(confirm)) {
+            JOptionPane.showMessageDialog(this, 
+                "Les mots de passe ne correspondent pas", 
+                "Erreur", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        if (nouveau.length() < 8) {
+            JOptionPane.showMessageDialog(this, 
+                "Le mot de passe doit contenir au moins 8 caractères", 
+                "Erreur", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        JOptionPane.showMessageDialog(this, 
+            "Mot de passe changé avec succès !", 
+            "Succès", 
+            JOptionPane.INFORMATION_MESSAGE);
+        
+        txtCurrentPassword.setText("");
+        txtNewPassword.setText("");
+        txtConfirmPassword.setText("");
+    }
+}
+    // ==================== PANEL AVIS & REVIEWS ====================
+private class PanelAvis extends JPanel {
+    private JComboBox<String> comboVol;
+    private JSlider sliderNote;
+    private JTextArea txtCommentaire;
+    private JTable tableAvis;
+    private DefaultTableModel modelAvis;
+    private JLabel lblNoteMoyenne;
+    private JProgressBar progressBar5, progressBar4, progressBar3, progressBar2, progressBar1;
+    private JLabel lblCount5, lblCount4, lblCount3, lblCount2, lblCount1;
+    
+    public PanelAvis() {
+        setLayout(new BorderLayout());
+        setBackground(BACKGROUND);
+        
+        // En-tête
+        JPanel header = createHeader();
+        add(header, BorderLayout.NORTH);
+        
+        // Contenu principal avec split
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        splitPane.setBackground(BACKGROUND);
+        splitPane.setBorder(null);
+        splitPane.setDividerSize(10);
+        
+        // Panel gauche : Formulaire d'avis
+        JPanel leftPanel = createAvisFormPanel();
+        
+        // Panel droit : Statistiques et avis récents
+        JPanel rightPanel = createStatsPanel();
+        
+        splitPane.setLeftComponent(leftPanel);
+        splitPane.setRightComponent(rightPanel);
+        splitPane.setResizeWeight(0.5);
+        
+        add(splitPane, BorderLayout.CENTER);
+        
+        // Charger les avis
+        chargerAvis();
+    }
+    
+    /**
+     * Crée l'en-tête
+     */
+    private JPanel createHeader() {
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(PRIMARY_DARK);
+        header.setBorder(BorderFactory.createEmptyBorder(25, 35, 25, 35));
+        
+        JLabel lblTitre = new JLabel("Avis et Reviews");
+        lblTitre.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        lblTitre.setForeground(TEXT_PRIMARY);
+        
+        JLabel lblSousTitre = new JLabel("Partagez votre expérience de voyage");
+        lblSousTitre.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblSousTitre.setForeground(TEXT_SECONDARY);
+        
+        JPanel leftPanel = new JPanel();
+        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+        leftPanel.setOpaque(false);
+        leftPanel.add(lblTitre);
+        leftPanel.add(Box.createVerticalStrut(5));
+        leftPanel.add(lblSousTitre);
+        
+        header.add(leftPanel, BorderLayout.WEST);
+        
+        return header;
+    }
+    
+    /**
+     * Crée le formulaire de dépôt d'avis
+     */
+    private JPanel createAvisFormPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(BACKGROUND);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 10));
+        
+        JPanel card = new JPanel();
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+            new ShadowBorder(10, new Color(0, 0, 0, 0.1f)),
+            BorderFactory.createEmptyBorder(30, 30, 30, 30)
+        ));
+        
+        // Titre du formulaire
+        JLabel lblFormTitre = new JLabel("Donnez votre avis");
+        lblFormTitre.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        lblFormTitre.setForeground(PRIMARY_DARK);
+        lblFormTitre.setAlignmentX(Component.LEFT_ALIGNMENT);
+        card.add(lblFormTitre);
+        card.add(Box.createVerticalStrut(20));
+        
+        // Sélection du vol
+        JLabel lblVol = new JLabel("Vol concerné");
+        lblVol.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblVol.setForeground(PRIMARY_DARK);
+        lblVol.setAlignmentX(Component.LEFT_ALIGNMENT);
+        card.add(lblVol);
+        card.add(Box.createVerticalStrut(5));
+        
+        comboVol = new JComboBox<>();
+        comboVol.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        comboVol.setBackground(Color.WHITE);
+        comboVol.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+        comboVol.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        comboVol.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Remplir avec les vols disponibles
+        remplirComboVols();
+        
+        card.add(comboVol);
+        card.add(Box.createVerticalStrut(20));
+        
+        // Note avec étoiles
+        JLabel lblNote = new JLabel("Votre note");
+        lblNote.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblNote.setForeground(PRIMARY_DARK);
+        lblNote.setAlignmentX(Component.LEFT_ALIGNMENT);
+        card.add(lblNote);
+        card.add(Box.createVerticalStrut(5));
+        
+        JPanel notePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        notePanel.setBackground(Color.WHITE);
+        notePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        sliderNote = new JSlider(1, 5, 5);
+        sliderNote.setBackground(Color.WHITE);
+        sliderNote.setPreferredSize(new Dimension(200, 40));
+        sliderNote.setMajorTickSpacing(1);
+        sliderNote.setPaintTicks(true);
+        sliderNote.setPaintLabels(true);
+        
+        JLabel lblEtoiles = new JLabel("★★★★★");
+        lblEtoiles.setFont(new Font("Segoe UI", Font.PLAIN, 24));
+        lblEtoiles.setForeground(new Color(255, 215, 0)); // Or
+        
+        sliderNote.addChangeListener(e -> {
+            int note = sliderNote.getValue();
+            String etoiles = "";
+            for (int i = 0; i < 5; i++) {
+                etoiles += (i < note) ? "★" : "☆";
+            }
+            lblEtoiles.setText(etoiles);
+        });
+        
+        notePanel.add(sliderNote);
+        notePanel.add(lblEtoiles);
+        
+        card.add(notePanel);
+        card.add(Box.createVerticalStrut(20));
+        
+        // Commentaire
+        JLabel lblCommentaire = new JLabel("Votre commentaire");
+        lblCommentaire.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblCommentaire.setForeground(PRIMARY_DARK);
+        lblCommentaire.setAlignmentX(Component.LEFT_ALIGNMENT);
+        card.add(lblCommentaire);
+        card.add(Box.createVerticalStrut(5));
+        
+        txtCommentaire = new JTextArea(5, 20);
+        txtCommentaire.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtCommentaire.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+        txtCommentaire.setLineWrap(true);
+        txtCommentaire.setWrapStyleWord(true);
+        
+        JScrollPane scrollCommentaire = new JScrollPane(txtCommentaire);
+        scrollCommentaire.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+        scrollCommentaire.setAlignmentX(Component.LEFT_ALIGNMENT);
+        scrollCommentaire.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
+        
+        card.add(scrollCommentaire);
+        card.add(Box.createVerticalStrut(25));
+        
+        // Bouton Publier
+        JButton btnPublier = new JButton("Publier mon avis");
+        btnPublier.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnPublier.setForeground(Color.WHITE);
+        btnPublier.setBackground(ACCENT);
+        btnPublier.setBorder(BorderFactory.createEmptyBorder(12, 25, 12, 25));
+        btnPublier.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnPublier.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        btnPublier.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btnPublier.setBackground(ACCENT_HOVER);
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btnPublier.setBackground(ACCENT);
+            }
+        });
+        
+        btnPublier.addActionListener(e -> publierAvis());
+        
+        card.add(btnPublier);
+        
+        panel.add(card, BorderLayout.CENTER);
+        
+        return panel;
+    }
+    
+    /**
+     * Crée le panel des statistiques
+     */
+    private JPanel createStatsPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(BACKGROUND);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 20));
+        
+        JPanel card = new JPanel();
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+            new ShadowBorder(10, new Color(0, 0, 0, 0.1f)),
+            BorderFactory.createEmptyBorder(30, 30, 30, 30)
+        ));
+        
+        // Titre
+        JLabel lblStatsTitre = new JLabel("Statistiques des avis");
+        lblStatsTitre.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblStatsTitre.setForeground(PRIMARY_DARK);
+        lblStatsTitre.setAlignmentX(Component.LEFT_ALIGNMENT);
+        card.add(lblStatsTitre);
+        card.add(Box.createVerticalStrut(20));
+        
+        // Note moyenne
+        JPanel moyennePanel = new JPanel();
+        moyennePanel.setLayout(new BoxLayout(moyennePanel, BoxLayout.Y_AXIS));
+        moyennePanel.setBackground(new Color(250, 250, 252));
+        moyennePanel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+        moyennePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        JLabel lblMoyenneTitre = new JLabel("Note moyenne");
+        lblMoyenneTitre.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblMoyenneTitre.setForeground(TEXT_SECONDARY);
+        lblMoyenneTitre.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        lblNoteMoyenne = new JLabel("4.5 ★");
+        lblNoteMoyenne.setFont(new Font("Segoe UI", Font.BOLD, 48));
+        lblNoteMoyenne.setForeground(new Color(255, 215, 0));
+        lblNoteMoyenne.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        moyennePanel.add(Box.createVerticalStrut(15));
+        moyennePanel.add(lblMoyenneTitre);
+        moyennePanel.add(lblNoteMoyenne);
+        moyennePanel.add(Box.createVerticalStrut(15));
+        
+        card.add(moyennePanel);
+        card.add(Box.createVerticalStrut(25));
+        
+        // Distribution des notes
+        JLabel lblDistribution = new JLabel("Distribution des notes");
+        lblDistribution.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblDistribution.setForeground(PRIMARY_DARK);
+        lblDistribution.setAlignmentX(Component.LEFT_ALIGNMENT);
+        card.add(lblDistribution);
+        card.add(Box.createVerticalStrut(15));
+        
+        // Barres de progression pour chaque note
+        card.add(createNoteLine("5 ★", progressBar5 = new JProgressBar(), lblCount5 = new JLabel("0")));
+        card.add(Box.createVerticalStrut(10));
+        card.add(createNoteLine("4 ★", progressBar4 = new JProgressBar(), lblCount4 = new JLabel("0")));
+        card.add(Box.createVerticalStrut(10));
+        card.add(createNoteLine("3 ★", progressBar3 = new JProgressBar(), lblCount3 = new JLabel("0")));
+        card.add(Box.createVerticalStrut(10));
+        card.add(createNoteLine("2 ★", progressBar2 = new JProgressBar(), lblCount2 = new JLabel("0")));
+        card.add(Box.createVerticalStrut(10));
+        card.add(createNoteLine("1 ★", progressBar1 = new JProgressBar(), lblCount1 = new JLabel("0")));
+        card.add(Box.createVerticalStrut(25));
+        
+        // Avis récents
+        JLabel lblRecents = new JLabel("Avis récents");
+        lblRecents.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblRecents.setForeground(PRIMARY_DARK);
+        lblRecents.setAlignmentX(Component.LEFT_ALIGNMENT);
+        card.add(lblRecents);
+        card.add(Box.createVerticalStrut(15));
+        
+        // Tableau des avis
+        String[] colonnes = {"Client", "Vol", "Note", "Commentaire", "Date"};
+        modelAvis = new DefaultTableModel(colonnes, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        
+        tableAvis = new JTable(modelAvis);
+        tableAvis.setRowHeight(50);
+        tableAvis.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tableAvis.setShowGrid(false);
+        tableAvis.setIntercellSpacing(new Dimension(0, 0));
+        
+        // Renderer pour les notes
+        tableAvis.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                
+                if (value != null) {
+                    int note = Integer.parseInt(value.toString());
+                    String etoiles = "";
+                    for (int i = 0; i < 5; i++) {
+                        etoiles += (i < note) ? "★" : "☆";
+                    }
+                    setText(etoiles);
+                    setForeground(new Color(255, 215, 0));
+                    setHorizontalAlignment(CENTER);
+                }
+                
+                setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+                
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252));
+                }
+                
+                return c;
+            }
+        });
+        
+        JScrollPane scrollAvis = new JScrollPane(tableAvis);
+        scrollAvis.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+        scrollAvis.setAlignmentX(Component.LEFT_ALIGNMENT);
+        scrollAvis.setPreferredSize(new Dimension(400, 200));
+        
+        card.add(scrollAvis);
+        
+        panel.add(card, BorderLayout.CENTER);
+        
+        return panel;
+    }
+    
+    /**
+     * Crée une ligne de distribution des notes
+     */
+    private JPanel createNoteLine(String label, JProgressBar bar, JLabel count) {
+        JPanel panel = new JPanel(new BorderLayout(10, 0));
+        panel.setBackground(Color.WHITE);
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
+        
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lbl.setForeground(PRIMARY_DARK);
+        lbl.setPreferredSize(new Dimension(40, 20));
+        
+        bar.setBackground(new Color(229, 231, 235));
+        bar.setForeground(new Color(255, 215, 0));
+        bar.setStringPainted(true);
+        bar.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        
+        count.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        count.setForeground(TEXT_SECONDARY);
+        count.setPreferredSize(new Dimension(30, 20));
+        count.setHorizontalAlignment(SwingConstants.RIGHT);
+        
+        panel.add(lbl, BorderLayout.WEST);
+        panel.add(bar, BorderLayout.CENTER);
+        panel.add(count, BorderLayout.EAST);
+        
+        return panel;
+    }
+    
+    /**
+     * Remplit la combo box avec les vols disponibles
+     */
+    private void remplirComboVols() {
+        comboVol.removeAllItems();
+        comboVol.addItem("Sélectionnez un vol");
+        
+        for (Vol vol : serviceVols.getTousLesVols()) {
+            comboVol.addItem(vol.getNumeroVol() + " - " + vol.getAeroportDepart() + " → " + vol.getAeroportArrivee());
+        }
+    }
+    
+    /**
+     * Publie un avis
+     */
+    private void publierAvis() {
+        if (comboVol.getSelectedIndex() == 0) {
+            JOptionPane.showMessageDialog(this, 
+                "Veuillez sélectionner un vol", 
+                "Erreur", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        if (txtCommentaire.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Veuillez saisir un commentaire", 
+                "Erreur", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        if (clientConnecte == null) {
+            JOptionPane.showMessageDialog(this, 
+                "Vous devez être connecté pour publier un avis", 
+                "Erreur", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Récupérer les données
+        String volSelectionne = (String) comboVol.getSelectedItem();
+        String numeroVol = volSelectionne.split(" - ")[0];
+        int note = sliderNote.getValue();
+        String commentaire = txtCommentaire.getText().trim();
+        
+        // Ajouter l'avis
+        serviceAvis.ajouterAvis(
+            clientConnecte.getId(),
+            clientConnecte.getPrenom() + " " + clientConnecte.getNom(),
+            numeroVol,
+            note,
+            commentaire
+        );
+        
+        JOptionPane.showMessageDialog(this, 
+            "Votre avis a été publié avec succès !", 
+            "Succès", 
+            JOptionPane.INFORMATION_MESSAGE);
+        
+        // Réinitialiser le formulaire
+        comboVol.setSelectedIndex(0);
+        sliderNote.setValue(5);
+        txtCommentaire.setText("");
+        
+        // Recharger les avis
+        chargerAvis();
+    }
+    
+    /**
+     * Charge les avis
+     */
+    private void chargerAvis() {
+        List<Avis> avisList = serviceAvis.getTousLesAvis();
+        
+        // Mettre à jour les statistiques
+        if (!avisList.isEmpty()) {
+            double moyenne = avisList.stream().mapToInt(Avis::getNote).average().orElse(0.0);
+            lblNoteMoyenne.setText(String.format("%.1f ★", moyenne));
+            
+            // Compter les notes
+            long count5 = avisList.stream().filter(a -> a.getNote() == 5).count();
+            long count4 = avisList.stream().filter(a -> a.getNote() == 4).count();
+            long count3 = avisList.stream().filter(a -> a.getNote() == 3).count();
+            long count2 = avisList.stream().filter(a -> a.getNote() == 2).count();
+            long count1 = avisList.stream().filter(a -> a.getNote() == 1).count();
+            
+            int total = avisList.size();
+            
+            lblCount5.setText(String.valueOf(count5));
+            lblCount4.setText(String.valueOf(count4));
+            lblCount3.setText(String.valueOf(count3));
+            lblCount2.setText(String.valueOf(count2));
+            lblCount1.setText(String.valueOf(count1));
+            
+            progressBar5.setValue((int) (count5 * 100 / total));
+            progressBar4.setValue((int) (count4 * 100 / total));
+            progressBar3.setValue((int) (count3 * 100 / total));
+            progressBar2.setValue((int) (count2 * 100 / total));
+            progressBar1.setValue((int) (count1 * 100 / total));
+        }
+        
+        // Mettre à jour le tableau
+        modelAvis.setRowCount(0);
+        for (Avis avis : avisList) {
+            modelAvis.addRow(new Object[]{
+                avis.getNomClient(),
+                avis.getNumeroVol(),
+                avis.getNote(),
+                avis.getCommentaire().length() > 50 ? 
+                    avis.getCommentaire().substring(0, 50) + "..." : 
+                    avis.getCommentaire(),
+                avis.getDateFormatee()
+            });
+        }
+    }
+}
     
     // ==================== POINT D'ENTRÉE ====================
     
