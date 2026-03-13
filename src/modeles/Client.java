@@ -1,5 +1,5 @@
 package modeles;
-
+import java.util.Objects;
 import java.util.List;
 import java.util.ArrayList;
 import interfaces.IAuthentifiable;
@@ -15,6 +15,7 @@ public class Client implements IAuthentifiable, INotifiable {
     private boolean connecte;
     private List<Reservation> historiqueReservations;
     
+    // Constructeur avec mot de passe
     public Client(int idClient, String nom, String prenom, String email, String telephone, String password) {
         this.idClient = idClient;
         this.nom = nom;
@@ -22,9 +23,13 @@ public class Client implements IAuthentifiable, INotifiable {
         this.email = email;
         this.telephone = telephone;
         this.password = password;
-
         this.historiqueReservations = new ArrayList<>();
         this.connecte = false;
+    }
+    
+    // Constructeur sans mot de passe (pour mode invité)
+    public Client(int idClient, String nom, String prenom, String email, String telephone) {
+        this(idClient, nom, prenom, email, telephone, "");
     }
     
     // Implémentation IAuthentifiable
@@ -80,9 +85,61 @@ public class Client implements IAuthentifiable, INotifiable {
     }
     
     // Getters
-    public String getNom() { return nom; }
-    public String getPrenom() { return prenom; }
-    public String getEmail() { return email; }
-    public boolean isConnecte() { return connecte; }
+    public int getId() { 
+        return idClient; 
+    }
+    
+    public String getNom() { 
+        return nom; 
+    }
+    
+    public String getPrenom() { 
+        return prenom; 
+    }
+    
+    public String getEmail() { 
+        return email; 
+    }
+    
+    public String getTelephone() { 
+        return telephone; 
+    }
+    
+    public boolean isConnecte() { 
+        return connecte; 
+    }
+    
+    // Setters
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+    
+    public void setPrenom(String prenom) {
+        this.prenom = prenom;
+    }
+    
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
+    }
+    
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Client client = (Client) obj;
+        return idClient == client.idClient;
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(idClient);
+    }
 }
-
