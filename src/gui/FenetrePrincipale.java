@@ -27,6 +27,11 @@ public class FenetrePrincipale extends JFrame {
     private static final Color BACKGROUND = new Color(241, 245, 249);     // Slate 100 - Fond général
     private static final Color CARD_BG = new Color(255, 255, 255, 250);   // Blanc carte
     private static final Color BORDER_COLOR = new Color(226, 232, 240);   // Bordure grise
+    private static final Color SKY_BLUE = new Color(135, 206, 235);       // Bleu ciel clair
+private static final Color SKY_BLUE_DARK = new Color(100, 149, 237);  // Bleu ciel plus foncé (Cornflower Blue)
+private static final Color SKY_BLUE_LIGHT = new Color(173, 216, 230); // Bleu ciel très clair (Light Blue)
+private static final Color SKY_GRADIENT_START = new Color(135, 206, 250); // Dégradé début (Light Sky Blue)
+private static final Color SKY_GRADIENT_END = new Color(70, 130, 180);    // Dégradé fin (Steel Blue)
     
     // ==================== SERVICES ====================
     private ServiceVols serviceVols;
@@ -81,7 +86,7 @@ public class FenetrePrincipale extends JFrame {
         // Configuration du look and feel système
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            UIManager.put("Panel.background", BACKGROUND);
+            UIManager.put("Panel.background", SKY_BLUE_LIGHT);
             UIManager.put("OptionPane.background", BACKGROUND);
         } catch (Exception e) {
             e.printStackTrace();
@@ -89,7 +94,33 @@ public class FenetrePrincipale extends JFrame {
         
         // Layout principal
         setLayout(new BorderLayout());
-        
+        // Créer un JPanel personnalisé pour le fond en dégradé bleu ciel
+    JPanel backgroundPanel = new JPanel(new BorderLayout()) {
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            // Dégradé de fond bleu ciel
+            GradientPaint gradient = new GradientPaint(
+                0, 0, SKY_GRADIENT_START,
+                0, getHeight(), SKY_GRADIENT_END
+            );
+            g2d.setPaint(gradient);
+            g2d.fillRect(0, 0, getWidth(), getHeight());
+            
+            // Ajouter des nuages  (optionnel)
+            g2d.setColor(new Color(255, 255, 255, 50));
+            for (int i = 0; i < 5; i++) {
+                int x = (int) (Math.random() * getWidth());
+                int y = (int) (Math.random() * getHeight() / 2);
+                int size = 50 + (int) (Math.random() * 100);
+                g2d.fillOval(x, y, size, size / 2);
+            }
+            
+            g2d.dispose();
+        }
+    };
         // Création de la sidebar (masquée initialement)
         sidebar = creerSidebar();
         add(sidebar, BorderLayout.WEST);
@@ -97,8 +128,8 @@ public class FenetrePrincipale extends JFrame {
         
         // Panel central avec CardLayout pour la navigation
         cardLayout = new CardLayout();
-        panelPrincipal = new JPanel(cardLayout);
-        panelPrincipal.setBackground(BACKGROUND);
+    panelPrincipal = new JPanel(cardLayout);
+    panelPrincipal.setOpaque(false);
         
         // Initialisation de tous les panels
         panelConnexion = new PanelConnexion();
@@ -2406,7 +2437,7 @@ private class PanelReservation extends JPanel {
             
             // Boutons d'action
             JPanel panelBoutons = new JPanel(new FlowLayout());
-            panelBoutons.setBackground(Color.WHITE);
+            panelBoutons.setBackground(Color.blue);
             
             JButton btnTelecharger = creerBoutonPrincipal("Télécharger le billet");
             btnTelecharger.addActionListener(e -> telechargerBillet());
@@ -2609,12 +2640,12 @@ private class PanelReservation extends JPanel {
     }
     
     // ==================== PANEL MES RÉSERVATIONS ====================
-private class PanelProfil extends JPanel {
+private class PanelMesReservations extends JPanel {
     private JTable tableReservations;
     private DefaultTableModel modelReservations;
     private JLabel lblMessage;
     
-    public PanelProfil() {
+    public PanelMesReservations() {
         setLayout(new BorderLayout());
         setBackground(BACKGROUND);
         
@@ -2700,7 +2731,7 @@ private class PanelProfil extends JPanel {
         JTableHeader headerTable = tableReservations.getTableHeader();
         headerTable.setFont(new Font("Segoe UI", Font.BOLD, 13));
         headerTable.setBackground(PRIMARY);
-        headerTable.setForeground(Color.WHITE);
+        headerTable.setForeground(Color.blue);
         headerTable.setPreferredSize(new Dimension(0, 45));
         headerTable.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, ACCENT));
         
@@ -2768,7 +2799,7 @@ private class PanelProfil extends JPanel {
             JPanel messagePanel = new JPanel(new GridBagLayout());
             messagePanel.setBackground(Color.WHITE);
             
-            JLabel lblIcon = new JLabel("📅");
+            JLabel lblIcon = new JLabel();
             lblIcon.setFont(new Font("Segoe UI", Font.PLAIN, 64));
             lblIcon.setForeground(TEXT_SECONDARY);
             
@@ -2861,14 +2892,14 @@ private class PanelProfil extends JPanel {
         public PanelSieges() { setBackground(BACKGROUND); }
     }
     // ==================== PANEL MON PROFIL ====================
-private class PanelMesReservations extends JPanel {
+private class PanelProfil extends JPanel {
     private JTextField txtNom, txtPrenom, txtEmail, txtTelephone;
     private JPasswordField txtCurrentPassword, txtNewPassword, txtConfirmPassword;
     private JLabel lblMembreDepuis;
     private JTable tableReservations;
     private DefaultTableModel modelReservations;
     
-    public PanelMesReservations() {
+    public PanelProfil() {
         setLayout(new BorderLayout());
         setBackground(BACKGROUND);
         
@@ -2884,19 +2915,19 @@ private class PanelMesReservations extends JPanel {
         
         // Onglet Informations personnelles
         JPanel infoPanel = createInfoPanel();
-        tabbedPane.addTab("👤 Informations personnelles", infoPanel);
+        tabbedPane.addTab(" Informations personnelles", infoPanel);
         
         // Onglet Sécurité
         JPanel securityPanel = createSecurityPanel();
-        tabbedPane.addTab("🔒 Sécurité", securityPanel);
+        tabbedPane.addTab(" Sécurité", securityPanel);
         
         // Onglet Historique des réservations
         JPanel historiquePanel = createHistoriquePanel();
-        tabbedPane.addTab("📅 Historique des réservations", historiquePanel);
+        tabbedPane.addTab(" Historique des réservations", historiquePanel);
         
         // Onglet Préférences
         JPanel preferencesPanel = createPreferencesPanel();
-        tabbedPane.addTab("⚙️ Préférences", preferencesPanel);
+        tabbedPane.addTab(" Préférences", preferencesPanel);
         
         add(tabbedPane, BorderLayout.CENTER);
         
@@ -2960,7 +2991,7 @@ private class PanelMesReservations extends JPanel {
         gbc.insets = new Insets(10, 10, 10, 10);
         
         // Avatar
-        JLabel lblAvatar = new JLabel("👤");
+        JLabel lblAvatar = new JLabel();
         lblAvatar.setFont(new Font("Segoe UI", Font.PLAIN, 64));
         lblAvatar.setForeground(ACCENT);
         gbc.gridx = 0;
