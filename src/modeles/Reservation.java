@@ -100,7 +100,9 @@ public class Reservation implements IReservable, IPayable {
     public double calculerMontantTotal() {
         return vol.getPrix() * passagers.size();
     }
-    
+    public Client getClient() {
+    return client;
+}
     // Getters
     public int getIdReservation() { return idReservation; }
     public String getStatut() { return statut; }
