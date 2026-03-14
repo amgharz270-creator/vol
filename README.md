@@ -1,10 +1,7 @@
 ✈️ SkyBooking - Système de Réservation de Vols
-https://img.shields.io/badge/Java-17%252B-orange
-https://img.shields.io/badge/GUI-Swing-blue
-https://img.shields.io/badge/Architecture-MVC-green
-https://img.shields.io/badge/License-MIT-yellow
 
 📋 Table des matières
+
 Description
 
 Fonctionnalités
@@ -109,23 +106,7 @@ Vue d'ensemble de toutes les réservations
 
 Possibilité d'annulation
 
-🏗 Architecture
-L'application suit une architecture en couches :
 
-text
-┌─────────────────────────────────────┐
-│        Interface Utilisateur        │ (FenetrePrincipale, Panels Swing)
-│           Couche Présentation        │
-├─────────────────────────────────────┤
-│           Services Métier            │ (ServiceVols, ServiceReservations, etc.)
-│           Couche Métier              │
-├─────────────────────────────────────┤
-│         Classes Modèles              │ (Client, Vol, Reservation, etc.)
-│         Couche Domaine               │
-├─────────────────────────────────────┤
-│         Interfaces                   │ (IAuthentifiable, IReservable, etc.)
-│         Couche Contrats              │
-└─────────────────────────────────────┘
 Design Patterns utilisés
 Pattern	Utilisation
 Singleton	Services (ServiceVols, ServiceReservations, etc.) - une seule instance partagée
@@ -149,12 +130,12 @@ Git (optionnel)
 Cloner le dépôt
 
 bash
-git clone https://github.com/votre-username/skybooking.git
-cd skybooking
+git clone https://github.com/amgharz270-creator/vol.git
+cd vol
 Compiler le projet
 
 bash
-javac -d bin $(find . -name "*.java")
+javac -encoding UTF-8 -d bin src/interfaces/*.java src/modeles/*.java src/services/*.java src/gui/*.java
 Exécuter l'application
 
 bash
@@ -166,7 +147,7 @@ mvn clean compile exec:java -Dexec.mainClass="gui.FenetrePrincipale"
 🎮 Utilisation
 Identifiants de test
 Rôle	Email	Mot de passe
-Client test	zineb.amghar@email.com	password123
+Client test	zinebamghar1949@gmail.com	zineeeb12
 Admin	admin@skybooking.com	admin123
 Guide rapide
 Connexion : Utilisez les identifiants ci-dessus ou créez un compte
@@ -181,16 +162,6 @@ Billet : Téléchargez votre billet PDF
 
 Avis : Donnez votre avis après le voyage
 
-📸 Captures d'écran
-Note : Des captures d'écran seront ajoutées prochainement
-
-Écran	Description
-Connexion	Interface moderne avec carte de connexion
-Recherche	Filtres de recherche et tableau des résultats
-Sélection sièges	Plan interactif de l'avion
-Paiement	Interface de paiement sécurisé
-Profil	Gestion des informations personnelles
-Admin	Tableau de bord avec statistiques
 📁 Structure du projet
 text
 skybooking/
@@ -226,8 +197,50 @@ skybooking/
 │   └── settings.json
 ├── README.md
 └── pom.xml (optionnel)
-📊 Diagrammes UML
-Diagramme de Cas d'Utilisation
+
+🚀 Améliorations futures
+Base de données persistante (MySQL/PostgreSQL)
+
+API REST pour version web
+
+Application mobile (Android/iOS)
+
+Intégration avec de vraies passerelles de paiement
+
+Système de fidélité avec miles
+
+Notifications par email réelles (JavaMail)
+
+Internationalisation (i18n) - Support multilingue
+
+Thèmes personnalisables
+
+Export des rapports (Excel/PDF)
+
+Tests unitaires complets
+
+👥 Auteurs
+Zineb Amghar - Développement principal - GitHub
+
+📄 Licence
+Ce projet est sous licence MIT - voir le fichier LICENSE pour plus de détails.
+
+text
+MIT License
+
+Copyright (c) 2026 Zineb Amghar
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files...
+🙏 Remerciements
+Merci à tous les contributeurs et testeurs
+
+Inspiré par les systèmes de réservation des grandes compagnies aériennes
+
+Développé dans le cadre d'un projet d'études en IHM( Interface-Homme-Machine)
+
+
+Dernière mise à jour : Mars 2026
 
 
 
