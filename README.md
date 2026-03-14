@@ -18,7 +18,6 @@ Captures d'écran
 
 Structure du projet
 
-Diagrammes UML
 
 Auteurs
 
@@ -259,71 +258,3 @@ Dernière mise à jour : Mars 2026
 
 
 
-Diagramme de Classes (simplifié)
-text
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Client    │────▶│ Reservation │────▶│     Vol     │
-├─────────────┤     ├─────────────┤     ├─────────────┤
-│-idClient    │     │-idReservation│     │-numeroVol   │
-│-nom         │     │-statut      │     │-compagnie   │
-│-email       │     │-montantPaye │     │-destination │
-└─────────────┘     └─────────────┘     │-prix        │
-                                          └─────────────┘
-        │                                      │
-        ▼                                      ▼
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Avis      │     │  Passager   │     │   Siege     │
-├─────────────┤     ├─────────────┤     ├─────────────┤
-│-note        │     │-nom         │     │-numeroSiege │
-│-commentaire │     │-passeport   │     │-occupe      │
-└─────────────┘     └─────────────┘     └─────────────┘
-Pour les diagrammes complets, consultez la documentation UML
-
-🧪 Tests
-bash
-# Exécuter les tests
-mvn test
-🚀 Améliorations futures
-Base de données persistante (MySQL/PostgreSQL)
-
-API REST pour version web
-
-Application mobile (Android/iOS)
-
-Intégration avec de vraies passerelles de paiement
-
-Système de fidélité avec miles
-
-Notifications par email réelles (JavaMail)
-
-Internationalisation (i18n) - Support multilingue
-
-Thèmes personnalisables
-
-Export des rapports (Excel/PDF)
-
-Tests unitaires complets
-
-👥 Auteurs
-Zineb Amghar - Développement principal - GitHub
-
-📄 Licence
-Ce projet est sous licence MIT - voir le fichier LICENSE pour plus de détails.
-
-text
-MIT License
-
-Copyright (c) 2026 Zineb Amghar
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files...
-🙏 Remerciements
-Merci à tous les contributeurs et testeurs
-
-Inspiré par les systèmes de réservation des grandes compagnies aériennes
-
-Développé dans le cadre d'un projet d'études en génie logiciel
-
-⭐ N'oubliez pas de mettre une étoile si ce projet vous a été utile !
-
-Dernière mise à jour : Mars 2026
